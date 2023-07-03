@@ -55,7 +55,23 @@
 # uv_layers = se utilza para acceder y manipular los mapas UV de un objeto.
 
 # smart_project = realiza un mapeo UV inteligente en una malla, lo que facilita la asignación de texturas y la manipulación en el espacio UV.
-
+                 # todo ****** PARAMETROS ****** todo #
     #? angle_limit = parametro que indica el ángulo máximo permitido entre las normales de las caras vecinas antes de que se realice una separación en el mapeo UV.
 
-    
+    #? margin_method = parametro que especifica el metod utilizado para calcular el margen al realizar la proyeccion del mapeo UV. Islas(grupos de caras conectadas)
+        #* 'SCALED' = Calcula el margen alrededor de cada isla en función de la escala relativa de las caras en el espacio UV. Las islas más grandes tendrán un margen proporcionalmente más amplio que las islas pequeñas.
+
+    #? island_margin = parametro que especifica el valor del margen (espacio) que se debe agregar alrededor de cada isla en el mapeo UV. Determina cuánto espacio adicional se agregará alrededor de cada isla.
+
+    #? area_weight = parametro que controla la influencia del tanaño de las caras en el asignación del espacio.
+
+    #? correct_aspect = parametro que determina si se debe mantener el aspecto correcto de las caras dureante la proyección del mapeo.
+        #* True = las caras en el mapeo UV se ajustarán proporcionalmente según su forma en la malla 3D.
+
+        #* False = las caras den el mapeo UV pueden deformarse para optimizar el uso del espacio disponible.
+
+    #? scale_to_bounds = parametro que determina si el mapeo UV se debe escalar para ajustarse a los límites del espacio de textura disponible.
+        #* True = el mapeo UV se ajustará proporcionalmente para ocupar todo el espacio de textura disponible SIN DEJAR ESPACIOS EN BLANCO.
+        #* False =  el mapeo UV mantendrá su ESCALA ORIGINAL y puede haber espacios en blanco en el espacio de textura si el mapeo UV no se ajusta completamente.
+
+# 
