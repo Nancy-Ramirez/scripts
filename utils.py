@@ -344,12 +344,12 @@ def link_image_to_metallic(obj, linked_images): #! enlaza un nodo de textura de 
                     image_texture = None  # inicializamos "image_texture" con None
                     for node in material.node_tree.nodes: # iteramos "image_texture" a través de todos los nodos del árbol de nodos del material.
                         if node.type == 'TEX_IMAGE' and node.image.name == image_name: # para cada nodo verificamos si es un nodo de textura de imagen y si el nombre de la  imagen del nodo coincide con "image_name"
-                            image_texture = node #
+                            image_texture = node # si se encuentra un nodo de textura, se asigna a "image_texture" y se rompe el bucle.
                             break
-                    if image_texture:
-                        # Link the image texture node to the Metallic channel
-                        material.node_tree.links.new(principled_bsdf.inputs['Metallic'], image_texture.outputs['Color'])
-                    else:
+                    if image_texture: # verificamos si "image_texture" es válido.
+
+                        material.node_tree.links.new(principled_bsdf.inputs['Metallic'], image_texture.outputs['Color']) # se enlaza el nodo de textura de imagen al canal metalico.
+                    else: # si "image_texture" resulta no ser válido.
                         print(f"Cannot find image texture node {image_name}")
                 else:
                     print("No texture to link for this material")
