@@ -112,7 +112,6 @@ def import_gltf_files(directory): #!función que importa archivos GTLF o GLB des
         for imported_object in imported_objects: # de manera de bucle recibe el objeto
             imported_file_name = imported_object.name # del objeto recibido por el bucle se guarda el nombre en la variable "imported_file_name"
 
-            
             suffix = 1 # genera un nombre unico para que se eviten conflictos en un futuro.
             unique_name = imported_file_name
 
@@ -141,7 +140,7 @@ def import_gltf_files(directory): #!función que importa archivos GTLF o GLB des
 
             print()
 
-            #? transform_apply = operador de Blender que aplica las transformaciones de ubicacion, rotacion y escala de un objeto
+            #? transform_apply = operador de Blender que aplica las transformaciones de ubicacion, rotacion y escala de un objeto.
             bpy.context.view_layer.objects.active = imported_object # establece elobjeto activo en la capa de vista actual, el cual asegura de que las operaciones sean para él.
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True) # aplica la transformación de escala al objeto activo.
             #Significa que cualquier escala no uniforme que se haya aplicado al objeto se convertirá en una escala uniforme de 1. en los ejes X, Y, Z.
@@ -157,59 +156,53 @@ def import_gltf_files(directory): #!función que importa archivos GTLF o GLB des
 
     return tile_collection, imported_collection  # retorna las colecciones creadas en esta función.
 
-def export(output_dir):
-    file_format = 'GLTF_SEPARATE'  # or 'GLTF' for a single file
+def export(output_dir): #!exportar objetos de la escena en formato gITF
+    file_format = 'GLTF_SEPARATE'  # generar archivos gITF separados por objetos.
 
-    # Create a new folder if it doesn't exist
-    export_dir = os.path.join(output_dir, 'export_temp')
+    #? path.join = une diferentes partes de una ruta o archivo
+    export_dir = os.path.join(output_dir, 'export_temp') # crear un nuevo directorio si es que no existe.
     if not os.path.exists(export_dir):
-        os.makedirs(export_dir)
+        #? makedirs = crea los directorios intermedios necesarios para la ruta.
+        os.makedirs(export_dir) 
 
-    # Get a list of all the objects in the scene
-    objects = bpy.context.scene.objects
-    cleanup()
+    objects = bpy.context.scene.objects # obtiene todos los objetos de la escena actual y los asigna a la variable "objects".
+    cleanup() # limpia y prepara la escena antes de exportar.
 
-    # Iterate over the objects
     for obj in objects:
-        # Make sure the object is a mesh
-        if obj.type == 'MESH':
-            # Select the object
-            bpy.context.view_layer.objects.active = obj
-            obj.select_set(True)
+        if obj.type == 'MESH': # si el ripo de objeto es una malla
+            #? view_layer = capa actual en la interfaz de usuario.
+            bpy.context.view_layer.objects.active = obj # establece el objeto activo en la capa de vista actual.
+            obj.select_set(True) # establece la selección del objeto.
+
+            bpy.ops.export_scene.gltf(filepath=os.path.join(export_dir, obj.name), export_format=file_format, use_selection=True, export_texture_dir=export_dir) #exporta el objeto en formato gITF
             
-            # Export the object to glTF format
-            bpy.ops.export_scene.gltf(filepath=os.path.join(export_dir, obj.name), export_format=file_format, use_selection=True, export_texture_dir=export_dir)
-            
-            # Deselect the object
-            obj.select_set(False)
+            obj.select_set(False) #deselecciona el objeto.
+#? UV = sistema de coordenada bidimensional que se utiliza para mapear texturas en una malla tridimensional.
 
-def setup_uvmap(obj):
+def setup_uvmap(obj): #! Configura el mapeado de coordenadas UV de un objeto
 
-    # Select the currently processed object
-    obj.select_set(True)
+    obj.select_set(True) # establece la selección del objeto.
+
+    bpy.context.view_layer.objects.active = obj # establece el objeto activo en la capa de vista actual.
     
-    # Set the currently processed object as the active object
-    bpy.context.view_layer.objects.active = obj
+    #? uv_layers = se utilza para acceder y manipular los mapas UV de un objeto.
+    uv_maps = obj.data.uv_layers # se inicializa "uv_maps" con la lista de mapas UV del objeto "obj".
+    if len(uv_maps) > 0: # verifica si hay algun mapa UV existente, comprobando la longitud de la lista.
+        for uv_map in uv_maps: # si hay mapas existentes se itera una por una en la lista.
+            obj.data.uv_layers.remove(uv_map) # elimina el mapa UV.
     
-    # Check if UV maps already exist
-    uv_maps = obj.data.uv_layers
-    if len(uv_maps) > 0:
-        # Remove existing UV maps
-        for uv_map in uv_maps:
-            obj.data.uv_layers.remove(uv_map)
-    
-    # Create a new UV Map called "Prop_UVMap"
-    uv_map = obj.data.uv_layers.new(name="Prop_UVMap")
-    obj.data.uv_layers.active = uv_map
+    uv_map = obj.data.uv_layers.new(name="Prop_UVMap") # crea un nuevo mapa UV llamado "Prop_UVMap"
+    obj.data.uv_layers.active = uv_map # establece el mapa UV recien creado como el mapa UV activo del objeto.
 
-    # Switch to Edit Mode
-    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.object.mode_set(mode='EDIT') # cambia el modo objeto al modo edición.
 
-    # Select all the faces of the mesh
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.select_all(action='SELECT') # selecciona todas las caras de la malla en el modo edición.
 
-    # Make a Smart UV Project
-    bpy.ops.uv.smart_project(angle_limit=1.151917, margin_method='SCALED', island_margin=0.0, area_weight=0.0, correct_aspect=True, scale_to_bounds=False)
+    #? smart_project = realiza un mapeo UV inteligente en una malla, lo que facilita la asignación de texturas y la manipulación en el espacio UV.
+    #? angle_limit = parametro que indica el ángulo máximo permitido entre las normales de las caras vecinas antes de que se realice una separación en el mapeo UV.
+    #? margin_method = especifica el metod utilizado para calcular el margen al realizar la proyeccion del mapeo UV. Islas(grupos de caras conectadas)
+        # 'SCALED' = Calcula el margen alrededor de cada isla en función
+    bpy.ops.uv.smart_project(angle_limit=1.151917, margin_method='SCALED', island_margin=0.0, area_weight=0.0, correct_aspect=True, scale_to_bounds=False) # se realiza un mapeo inteligente a la malla, utlizando los parametros.
 
 #    bpy.ops.uvpackeroperator.packbtn()
     
