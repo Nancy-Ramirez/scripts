@@ -222,6 +222,7 @@ def setup_uvmap(obj): #! Configura el mapeado de coordenadas UV de un objeto
     print("[UVMAP] " + obj.name + " DONE XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX") # imprimiria esto por ejemplo : "[UVMAP] Cube DONE XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 def UnlinkBaseColor(): #! Elimina el color base del material
+
     # Iterate through all objects in the scene
     for obj in bpy.context.scene.objects: # obtiene todos los objetos de la escena actual y se lo asigna a obj
         #? material_slots = son espacios reservados (o ranuras) en un objeto donde se pueden asignar y administrar los materiales que se aplicarán a las partes individuales del objeto.
@@ -233,100 +234,117 @@ def UnlinkBaseColor(): #! Elimina el color base del material
 
                 if principled_bsdf and image_texture and principled_bsdf.inputs["Base Color"].is_linked: #si existen los nodos "principled_bsdf", "image_texture" y verifica que la entrada "Base Color" del nodo "Principled BSDF" está conectada a algún otro nodo en el árbol de nodos.
 
-                    link = principled_bsdf.inputs["Base Color"].links[0] # accede a la lista de enlaces de la entrada "Base Color del nodo "Principled BDSF", esperando que  esté conectada en al menos un enlace. La expresión [0] se utiliza para acceder al primer enlace de la lista.
+                    link = principled_bsdf.inputs["Base Color"].links[0] # accede a la lista de enlaces de la entrada "Base Color" del nodo "Principled BDSF", esperando que  esté conectada en al menos un enlace. La expresión [0] se utiliza para acceder al primer enlace de la lista.
 
                     material.node_tree.links.remove(link) # elimina el enlace especificado de la red de nodos del material.
 
 
 def unlink_node_from_metallic(obj): #! desconecta un nodo vincula con la entrada "Metallic" de un material
+
     linked_nodes = [] # declaramos una lista que almacenará los nodos vinculados y sus respectivas salidas.
     if obj.material_slots: # verifica si el objeto tienen ranuras de material asignadas.
-        
-        for slot in obj.material_slots:
-            material = slot.material
-            # Get the principled BSDF node and the metallic input
-            principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
-            if principled_bsdf.inputs["Metallic"].is_linked:
-                link = principled_bsdf.inputs["Metallic"].links[0]
-                metallic_node = link.from_node
-                output_socket = link.from_socket
-                # Disconnect the link
-                material.node_tree.links.remove(link)
-                linked_nodes.append((metallic_node, output_socket))
+
+        for slot in obj.material_slots: # recorre cada ranura de material del objeto "obj" dentro del bucle.
+            material = slot.material # accede al material asignado a cada ranura.
+
+            principled_bsdf = material.node_tree.nodes.get("Principled BSDF")  # busca y devuelve el nodo con el nombre "Principled BSDF" en el árbol de nodos del materias.
+
+            if principled_bsdf.inputs["Metallic"].is_linked: # verifica que la entrada "Metallic " del nodo "Principled BSDF" está conectada a algún otro nodo en el árbol de nodos.
+
+                link = principled_bsdf.inputs["Metallic"].links[0] # accede a la lista de enlaces de la entrada "Metallic " del nodo "Principled BDSF", esperando que  esté conectada en al menos un enlace. La expresión [0] se utiliza para acceder al primer enlace de la lista.
+
+                #? from_node = se utiliza para acceder al nodo de origen de un enlace.
+                metallic_node = link.from_node # se accede al nodo de origen de un enlace, devuelve el nodo desde el cual se está tomando el valor de salida para el enlace en cuestión y se lo asigna a "metallic_node".
+
+                #? from_socket = enchufe de salida del nodo de origen de un enlace.
+                output_socket = link.from_socket # accede al socket de salida del nodo de origen de un enlace y se lo asigna a "output_socket".
+
+                material.node_tree.links.remove(link) #elimina el enlace.
+                linked_nodes.append((metallic_node, output_socket)) # se agrega el nodo y el socket de salida a la lista "linked_nodes"
                 print("Node unlinked from Metallic input")
             else:
-                linked_nodes.append((None, None))
+                linked_nodes.append((None, None)) # no hay nodo enlazado "Metallic", por lo tanto no se agrega nada a "linked_nodes"
                 print("No node linked to Metallic input")
     return linked_nodes
 
 
-def link_node_to_metallic(obj, linked_nodes):
-    if obj.material_slots and len(linked_nodes) == len(obj.material_slots):
-        # Check if any nodes were unlinked from the Metallic channel
-        if any(linked_node[0] is not None for linked_node in linked_nodes):
-            # Iterate through the nodes of each material
-            for i, slot in enumerate(obj.material_slots):
-                material = slot.material
-                # Get the principled BSDF node
-                principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
-                # Get the node and the output socket to be linked
-                node, output_socket = linked_nodes[i]
-                if node and output_socket:
-                    # Link the output socket to the Metallic channel
-                    material.node_tree.links.new(principled_bsdf.inputs['Metallic'], output_socket)
+def link_node_to_metallic(obj, linked_nodes): #! enlaza un nodo previamente desenlazado al canal "Metallic" del nodo "Principled BSDF" a cada uno de los materiales de un objeto.
+
+    if obj.material_slots and len(linked_nodes) == len(obj.material_slots): # verifica si el objeto tiene ranuras de material y verifica si la longitud de la lista "linked_nodes" es igual a la cantidad de ranuras de material del objeto.
+
+        if any(linked_node[0] is not None for linked_node in linked_nodes): # verifica si hay algun nodo enlazado a la lista "linked_node" que no sea "None"
+
+            #? enumerate = se utiliza para iterar sobre una secuencia.
+            #? material_slots = son espacios reservados (o ranuras) en un objeto donde se pueden asignar y administrar los materiales que se aplicarán a las partes individuales del objeto.
+            for i, slot in enumerate(obj.material_slots): # itera sobre los elementos de "obj.material" 
+                material = slot.material # asignamos el material asosciado a una ranura de material especifica a la variable "material".
+
+                principled_bsdf = material.node_tree.nodes.get("Principled BSDF")  # busca y devuelve el nodo con el nombre "Principled BSDF" en el árbol de nodos del materias.
+
+                node, output_socket = linked_nodes[i] # asignación simultanea de los valores almacenados en "linked_nodes"[i] a la variables "node" y "output_socket"
+                if node and output_socket: #verifica que si son validos y no son None
+                    
+                    material.node_tree.links.new(principled_bsdf.inputs['Metallic'], output_socket) # crea un nuevo enlace (link) entre un socket de entrada y un socket de salida en el árbol de nodos del material, permitiendo que la salida de un nodo se utilice como entrada en otro nodo.
                     print("Node linked to Metallic input")
-                else:
+                else: # si node o output_socket son invalidos o None
                     print("No node to link for this material or no output socket information available")
-        else:
+        else: # si no hay nodo enlazado a la lista "linked_node" o es none
             print("No nodes were unlinked from the Metallic input")
-    else:
+    else: # si no tiene ranuras de material o si la longitud de la lista "linked_nodes" es diferente a la cantidad de ranuras de material del objeto 
         print("Number of linked nodes does not match number of material slots")
 
-def unlink_image_from_metallic(obj):
-    linked_images = []
-    if obj.material_slots:
-        # Iterate through the nodes of each material
-        for slot in obj.material_slots:
-            material = slot.material
-            # Get the principled BSDF node and the image texture node
-            principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
-            if principled_bsdf.inputs["Metallic"].is_linked:
-                metallic_node = principled_bsdf.inputs['Metallic'].links[0].from_node
-                image_texture = None
-                if metallic_node.type == 'TEX_IMAGE':
-                    image_texture = metallic_node.image
-                if image_texture and principled_bsdf.inputs["Metallic"].is_linked:
-                    # Get the link between the nodes
-                    link = principled_bsdf.inputs["Metallic"].links[0]
-                    # Disconnect the link
-                    material.node_tree.links.remove(link)
-                    linked_images.append(image_texture.name)
+def unlink_image_from_metallic(obj): #! desvincula una textura de un nodo Principled BSDF en el canal metalico de un material.
+
+    linked_images = [] # declaramos una lista que almacenará los nodos vinculados y sus respectivas salidas.
+    if obj.material_slots:# verifica si el objeto tienen ranuras de material asignadas.
+
+        for slot in obj.material_slots: # recorre cada ranura de material del objeto "obj" dentro del bucle.
+            material = slot.material # accede al material asignado a cada ranura.
+
+            principled_bsdf = material.node_tree.nodes.get("Principled BSDF")  # busca y devuelve el nodo con el nombre "Principled BSDF" en el árbol de nodos del materias.
+
+            if principled_bsdf.inputs["Metallic"].is_linked: # verifica que la entrada "Metallic " del nodo "Principled BSDF" está conectada a algún otro nodo en el árbol de nodos.
+
+                #? from_node = se utiliza para acceder al nodo de origen de un enlace.
+                metallic_node = principled_bsdf.inputs['Metallic'].links[0].from_node  #forma más resumida para acceder a la lista de enlaces de la entrada "Metallic" de nodo "Principled BDSF" y que se pueda acceder aql nodo de origen de un enlace, devolviendo el nodo desde el cual está tomando el valor de salida y se lo asigna a "metallic_node"
+
+                image_texture = None # se inicializa para asegurarnos de que tenga un valor si no se encuentra una textura de imagen vinculada en el nodo metalico.
+                if metallic_node.type == 'TEX_IMAGE': # verifica si el tipo de nodo al que está vinculado el canal metalico sea un nodo de textura de imagen.
+                    image_texture = metallic_node.image #se le asigna el objeto de imagen de la textura a la variable "image_texture"
+                if image_texture and principled_bsdf.inputs["Metallic"].is_linked: # verifica si existe una textura de imagen y si el canal metalico sigue vinculado.
+                    link = principled_bsdf.inputs["Metallic"].links[0] # accede a la lista de enlaces de la entrada "Metallic " del nodo "Principled BDSF", esperando que  esté conectada en al menos un enlace. La expresión [0] se utiliza para acceder al primer enlace de la lista.
+
+                    material.node_tree.links.remove(link) #elimina el enlace
+                    linked_images.append(image_texture.name) # se agrega el nombre de la textura desvinculada a "linked_images"
                     print(linked_images, "Textures unlinked from Metallic input")
-                else:
-                    linked_images.append(None)
+                else: # si no existe textura de imagen o si el canal metalico no está vinculado
+                    linked_images.append(None) # se agrega "None" a la lista "linked_images"
                     print("No input to unlink")
-            else:
+            else: # si la entrada "Metallic" del nodo "Principled BSDF" no está conectada a ningún nodo en el árbol de nodos.
                 linked_images.append(None)
                 print("No texture linked to Metallic input")
     return linked_images
 
 
-def link_image_to_metallic(obj, linked_images):
-    if obj.material_slots and len(linked_images) == len(obj.material_slots):
-        # Check if any textures were unlinked from the Metallic channel
-        if any(linked_image is not None for linked_image in linked_images):
-            # Iterate through the nodes of each material
-            for i, slot in enumerate(obj.material_slots):
-                material = slot.material
-                # Get the principled BSDF node
-                principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
-                # Get the image texture node and the image name
-                image_name = linked_images[i]
-                if image_name:
-                    image_texture = None
-                    for node in material.node_tree.nodes:
-                        if node.type == 'TEX_IMAGE' and node.image.name == image_name:
-                            image_texture = node
+def link_image_to_metallic(obj, linked_images): #! enlaza un nodo de textura de imagen previamente desenlazado al canal "Metallic" del nodo "Principled BSDF" a cada uno de los materiales de un objeto.
+
+    if obj.material_slots and len(linked_images) == len(obj.material_slots): # verifica si el objeto tiene ranuras de material y verifica si la longitud de la lista "linked_images" es igual a la cantidad de ranuras de material del objeto.
+
+        if any(linked_image is not None for linked_image in linked_images): # verifica si hay algun nodo enlazado a la lista "linked_images" que no sea "None"
+
+            #? enumerate = se utiliza para iterar sobre una secuencia.
+            #? material_slots = son espacios reservados (o ranuras) en un objeto donde se pueden asignar y administrar los materiales que se aplicarán a las partes individuales del objeto.
+            for i, slot in enumerate(obj.material_slots): # itera sobre los elementos de "obj.material"
+                material = slot.material # asignamos el material asosciado a una ranura de material especifica a la variable "material".
+
+                principled_bsdf = material.node_tree.nodes.get("Principled BSDF") # busca y devuelve el nodo con el nombre "Principled BSDF" en el árbol de nodos del materias.
+
+                image_name = linked_images[i] # se almacena el nombre de la textura de imagen i en "image_name"
+                if image_name: # verifica  si "image_name" tiene un valor válido
+                    image_texture = None  # inicializamos "image_texture" con None
+                    for node in material.node_tree.nodes: # iteramos "image_texture" a través de todos los nodos del árbol de nodos del material.
+                        if node.type == 'TEX_IMAGE' and node.image.name == image_name: # para cada nodo verificamos si es un nodo de textura de imagen y si el nombre de la  imagen del nodo coincide con "image_name"
+                            image_texture = node #
                             break
                     if image_texture:
                         # Link the image texture node to the Metallic channel
