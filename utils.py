@@ -214,38 +214,34 @@ def setup_uvmap(obj): #! Configura el mapeado de coordenadas UV de un objeto
     bpy.ops.uv.smart_project(angle_limit=1.151917, margin_method='SCALED', island_margin=0.0, area_weight=0.0, correct_aspect=True, scale_to_bounds=False) # se realiza un mapeo inteligente a la malla, utlizando los parametros.
 
 #    bpy.ops.uvpackeroperator.packbtn()
-    
-    # Return to Object Mode
-    bpy.ops.object.mode_set(mode='OBJECT')
 
-    # Deselect all objects
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode='OBJECT') # regresa al modo objeto.
 
-    print("[UVMAP] " + obj.name + " DONE XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-        
-def UnlinkBaseColor():
+    bpy.ops.object.select_all(action='DESELECT') # deselecciona los objetos
+
+    print("[UVMAP] " + obj.name + " DONE XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX") # imprimiria esto por ejemplo : "[UVMAP] Cube DONE XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+def UnlinkBaseColor(): #! Elimina el color base del material
     # Iterate through all objects in the scene
-    for obj in bpy.context.scene.objects:
-        # Check if the object has a material
-        if obj.material_slots:
-            # Iterate through the nodes of each material
-            for slot in obj.material_slots:
-                material = slot.material
-                # Get the principled BSDF node and the image texture node
-                principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
-                image_texture = material.node_tree.nodes.get("Image Texture")
-                # Check if the nodes are valid and if they are linked
-                if principled_bsdf and image_texture and principled_bsdf.inputs["Base Color"].is_linked:
-                    # Get the link between the nodes
-                    link = principled_bsdf.inputs["Base Color"].links[0]
-                    # Disconnect the link
-                    material.node_tree.links.remove(link)
+    for obj in bpy.context.scene.objects: # obtiene todos los objetos de la escena actual y se lo asigna a obj
+        #? material_slots = son espacios reservados (o ranuras) en un objeto donde se pueden asignar y administrar los materiales que se aplicarán a las partes individuales del objeto.
+        if obj.material_slots: # verifica si el objeto tienen ranuras de material asignadas.
+            for slot in obj.material_slots: # recorre cada ranura de material del objeto "obj" dentro del bucle.
+                material = slot.material # accede al material asignado a cada ranura.
+                principled_bsdf = material.node_tree.nodes.get("Principled BSDF") # busca y devuelve el nodo con el nombre "Principled BSDF" en el árbol de nodos del materias.
+                image_texture = material.node_tree.nodes.get("Image Texture") # busca y devuelve el nodo con el nombre "Image Texture" en el árbol de nodos del materias.
+
+                if principled_bsdf and image_texture and principled_bsdf.inputs["Base Color"].is_linked: #si existen los nodos "principled_bsdf", "image_texture" y verifica que la entrada "Base Color" del nodo "Principled BSDF" está conectada a algún otro nodo en el árbol de nodos.
+
+                    link = principled_bsdf.inputs["Base Color"].links[0] # accede a la lista de enlaces de la entrada "Base Color del nodo "Principled BDSF", esperando que  esté conectada en al menos un enlace. La expresión [0] se utiliza para acceder al primer enlace de la lista.
+
+                    material.node_tree.links.remove(link) # elimina el enlace especificado de la red de nodos del material.
 
 
-def unlink_node_from_metallic(obj):
-    linked_nodes = []
-    if obj.material_slots:
-        # Iterate through the nodes of each material
+def unlink_node_from_metallic(obj): #! desconecta un nodo vincula con la entrada "Metallic" de un material
+    linked_nodes = [] # declaramos una lista que almacenará los nodos vinculados y sus respectivas salidas.
+    if obj.material_slots: # verifica si el objeto tienen ranuras de material asignadas.
+        
         for slot in obj.material_slots:
             material = slot.material
             # Get the principled BSDF node and the metallic input

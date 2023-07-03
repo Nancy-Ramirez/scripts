@@ -40,7 +40,7 @@
 
 # transform_apply = operador de Blender que aplica las transformaciones de ubicacion, rotacion y escala de un objeto.
 
-# material_slots = son espacios reservados en un objeto donde se pueden asignar y administrar los materiales que se aplicarán a las partes individuales del objeto.
+# material_slots = son espacios reservados (o ranuras) en un objeto donde se pueden asignar y administrar los materiales que se aplicarán a las partes individuales del objeto.
 
 # material = material especifico asignado a un objeto.
 
