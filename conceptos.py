@@ -75,3 +75,5 @@
         #* False =  el mapeo UV mantendrá su ESCALA ORIGINAL y puede haber espacios en blanco en el espacio de textura si el mapeo UV no se ajusta completamente.
 
 # material_slot_remove = función encargada de eliminar un slot de material de un objeto.
+
+# window.screen = propiedad de Blender que se utiliza para acceder a la pantalla activa de una ventana especifica.

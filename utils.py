@@ -477,71 +477,66 @@ def select_image_texture_node(): #! selecciona y establece como nodo activo el p
         if len(selected_obj.data.materials) == 0: # verifica si el objeto tiene un material.
             print("The selected object has no material.")
             continue
-        
+
         # Get the active material
         active_material = selected_obj.active_material # obtiene el material activo
         print(active_material) # imprime el material activo.
-        
+
         # Check if the active material has nodes
-        if active_material.node_tree is None: # 
+        if active_material.node_tree is None: # verifica si el material activo tiene un árbol de nodos
             print("The active material has no node tree.")
             continue
-        
-        # Get the material node tree
-        node_tree = active_material.node_tree
-        
+
+        node_tree = active_material.node_tree # obtiene el árbol de nodos del material.
+
         # Get the image texture nodes
-        image_texture_nodes = [node for node in node_tree.nodes if node.type == 'TEX_IMAGE']
-        
-        # Check if there are image texture nodes
-        if len(image_texture_nodes) == 0:
+        image_texture_nodes = [node for node in node_tree.nodes if node.type == 'TEX_IMAGE'] # obtiene los nodos de textura de imagen iterando nodo por nodo y verificando que sean nodos del tipo "TEX_IMAGE"
+
+        if len(image_texture_nodes) == 0: # verifica si hay nodos de textura de imagen
             print("The material has no image texture nodes.")
             continue
-        
-        # Deselect all nodes
-        for node in node_tree.nodes:
-            node.select = False
 
-        # Select the first image texture node
-        image_texture_node = image_texture_nodes[0]
-        image_texture_node.select = True
-        
-        # Set the active node
-        node_tree.nodes.active = image_texture_node
-        
+        for node in node_tree.nodes: #itera nodo por nodo del arbol de nodos.
+            node.select = False # deselecciona todos los nodos, uno por uno.
+
+        image_texture_node = image_texture_nodes[0] # obtiene el primer nodo de textura de imagen.
+        image_texture_node.select = True  # cambia su propiedad anterior (False)
+
+        node_tree.nodes.active = image_texture_node # establece el nodo activo en el árbol de nodos
+
         print("Image Texture node selected and set as active.")
 
+#? deepbump.colortonormals = este operador se utiliza para generar mapas de normales a partir de texturas de imagen.
+#? mapa de normales = es una textura que se utiliza en gráficos 3d para simular detalles de relieve en una superficie sin aumentar la cantidad de poligonos del modelo 3d
+def colortonormals(): #! función encargada de aplicar el operador "deepbump.colortonormals"
+    select_image_texture_node()  # llama la función "select_image_texture_node" que trabajamos antes.
 
-def colortonormals():
-    select_image_texture_node()
+    selected_objects = bpy.context.selected_objects # obtiene los objetos seleccionados.
 
-    # Get the selected objects
-    selected_objects = bpy.context.selected_objects
-
-    for obj in selected_objects:
+    for obj in selected_objects: # itera los objetos seleccionados.
         # Set the currently processed object as the active object
-        bpy.context.view_layer.objects.active = obj
+        bpy.context.view_layer.objects.active = obj # establece el objeto actualmente procesado como objeto activo en la capa de vista actual.
 
-        # Get the materials of the object
-        materials = obj.data.materials
+        materials = obj.data.materials # obtiene los materiales del objeto.
 
-        # Iterate over the materials
-        for material in materials:
+        for material in materials: # itera los materiales del objeto.
             # Get the material node tree
-            node_tree = material.node_tree
+            node_tree = material.node_tree # obtiene el árbol de nodos del material.
 
             # Check if the node tree exists
-            if node_tree is None:
+            if node_tree is None: # verifica que exista árbol de nodo en el material.
                 print("No node tree found for material:", material.name)
                 continue
 
             # Get the names of the nodes
-            node_names = [node.name for node in node_tree.nodes]
+            node_names = [node.name for node in node_tree.nodes] # obtiene el nombre del nodo iterando en los nodos que tiene el árbol de nodos.
             print("MATERIAL:", material.name + ":", "NODE TREE: " + node_tree.name, node_names)
 
-            # Find the area of type 'NODE_EDITOR' in the active window
-            for window in bpy.context.window_manager.windows:
-                screen = window.screen
+            #todo Encuentra la ventana del tipo "NODE_EDITOR"
+            for window in bpy.context.window_manager.windows: # itera todas las ventanas abiertas en Blender
+
+                #? window.screen = propiedad de Blender que se utiliza para acceder a la pantalla activa de una ventana especifica.
+                screen = window.screen # asignamos "window.screen" a la variable "screen"
 
                 for area in screen.areas:
                     if area.type == 'NODE_EDITOR':
