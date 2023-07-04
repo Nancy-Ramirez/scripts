@@ -77,3 +77,10 @@
 # material_slot_remove = función encargada de eliminar un slot de material de un objeto.
 
 # window.screen = propiedad de Blender que se utiliza para acceder a la pantalla activa de una ventana especifica.
+
+# next() = es un iterador,avanza al siguiente elemento y lo devuelve.
+
+# override = es un diccionario de Blender que se utiliza para proporcionar información adicional y configuraciones personalizadas al ejecutar una operación o una anulación.
+    #? window = representa la ventana en la que se realiza la operación.
+    #? screen = representa a pantala en la que se realiza la operación.
+    #? area = representa el área en la que se realiza la operación.

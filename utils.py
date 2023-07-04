@@ -538,30 +538,35 @@ def colortonormals(): #! función encargada de aplicar el operador "deepbump.col
                 #? window.screen = propiedad de Blender que se utiliza para acceder a la pantalla activa de una ventana especifica.
                 screen = window.screen # asignamos "window.screen" a la variable "screen"
 
-                for area in screen.areas:
-                    if area.type == 'NODE_EDITOR':
-                        override = {'window': window, 'screen': screen, 'area': area}
+                for area in screen.areas: # itera sobre todas las areas (regiones) presentes en la pantalla activa.
+                    if area.type == 'NODE_EDITOR': # verifica si el tipo de area es "NODE_EDITOR"
+                        #? override = es un diccionario de Blender que se utiliza para proporcionar información adicional y configuraciones personalizadas al ejecutar una operación o una anulación.
+                        #* window = representa la ventana en la que se realiza la operación.
+                        #* screen = representa a pantala en la que se realiza la operación.
+                        #* area = representa el área en la que se realiza la operación.
+                        override = {'window': window, 'screen': screen, 'area': area} # crea un diccionadio llamado "override" que contiene referencias a la ventanda, pantalla y área actuales.
 
                         # Get the image texture node
-                        image_texture_node = next((node for node in node_tree.nodes if node.type == 'TEX_IMAGE'), None)
+                        #? next() = es un iterador,avanza al siguiente elemento y lo devuelve.
+                        image_texture_node = next((node for node in node_tree.nodes if node.type == 'TEX_IMAGE'), None) # busca en el árbol de nodos de material  y devuelve el primer nodo que tenga en tipo "TEX_IMAGE", si se encuentra el nodo de textura de imagen, se asigna a la variable "image_texture_node", de lo contrario, se le asigna el valor "None".
 
-                        if image_texture_node is None:
+                        if image_texture_node is None: # verifica si "image_texture_node" está vacío.
                             print("No image texture node found in material:", material.name)
-                            break
+                            break # sale del bucle y detienen la iteración adicional en caso de no se encuentre ningún nodo de textura de imagen en el material.
 
                         # Specify the material to override
-                        override['material'] = bpy.data.materials.get(material.name)
+                        override['material'] = bpy.data.materials.get(material.name) # asigna el material actual al diccionario "override" con la clave "material"
 
                         # Get the texture of the image texture node
-                        texture = image_texture_node.image
-                        image = image_texture_node.image.name
+                        texture = image_texture_node.image # obtiene la imagen que se está utilizando como textura.
+                        image = image_texture_node.image.name # obtiene el nombre de la imagen que se está utilizando como textura.
 
-                        if texture is None:
+                        if texture is None: # verifica si texture está vacío
                             print("No texture found in image texture node:", image_texture_node.name)
                             continue
 
-                        if image_texture_node is not None:
-                            image = bpy.data.images.get(image)
+                        if image_texture_node is not None: # verifica si la variable no es None
+                            image = bpy.data.images.get(image) #  
 
                         image_texture_node.select = True
 
