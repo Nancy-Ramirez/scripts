@@ -74,4 +74,4 @@
         #* True = el mapeo UV se ajustará proporcionalmente para ocupar todo el espacio de textura disponible SIN DEJAR ESPACIOS EN BLANCO.
         #* False =  el mapeo UV mantendrá su ESCALA ORIGINAL y puede haber espacios en blanco en el espacio de textura si el mapeo UV no se ajusta completamente.
 
-# 
+# material_slot_remove = función encargada de eliminar un slot de material de un objeto.

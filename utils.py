@@ -358,60 +358,56 @@ def link_image_to_metallic(obj, linked_images): #! enlaza un nodo de textura de 
     else:
         print("Number of linked images does not match number of material slots")
 
+def restore_materials(): #! restaura los materiales de los objetos en la escena que han sido renombrados temporalmente.
 
-def restore_materials():
-    # Set the active object to the first object in the scene
-    if bpy.context.scene.objects:
-        bpy.context.view_layer.objects.active = bpy.context.scene.objects[0]
+    if bpy.context.scene.objects: # verifica si la lista de objetos no está vacía, es decir, si hay al menos un objeto en la escena.
+        bpy.context.view_layer.objects.active = bpy.context.scene.objects[0] # establece el objeto activo en la vista actual.
 
-    for obj in bpy.context.scene.objects:
-        if obj.type == 'MESH':
-            # Loop through each material in the object
-            for i, mat in enumerate(obj.data.materials):
-                # Check if the material name ends with "_new"
-                if mat.name.endswith("_new"):
-                    # Get the prefix of the material name by removing "_new"
-                    prefix = mat.name[:-4]
-                    
-                    # Loop through all materials in the scene and find one with the same prefix
-                    for other_mat in bpy.data.materials:
+    for obj in bpy.context.scene.objects: # recorre todos los objetos en la escena.
+        if obj.type == 'MESH': # verifica si el tipo del objeto es "MESH"
+
+            for i, mat in enumerate(obj.data.materials): # recorremos cada material en el objeto.
+
+                if mat.name.endswith("_new"): # verifica si el nombre del material termina con "_new"
+
+                    prefix = mat.name[:-4] # se elimina "_new" y se obtiene el prefijo del material.
+
+                    for other_mat in bpy.data.materials: # bucle hasta obtener un material con el mismo prefijo.
                         if other_mat.name.startswith(prefix):
-                            # Replace the current material with the new material
+                            # reemplaza el material actual del objeto por el nuevo material encontrado.
                             obj.data.materials[i] = other_mat
                             break
 
-            slots_to_remove = []
-            for i, slot in enumerate(obj.material_slots):
-                if slot.material and slot.material.name.endswith("_new"):
-                    slots_to_remove.append(i)
-            for i in reversed(slots_to_remove):
-                obj.active_material_index = i
-                bpy.ops.object.material_slot_remove({'object': obj})
+            slots_to_remove = [] # se inicializa la lista "slots_to_remove" para almacenar los índices de los slots de material que deben ser eliminados.
+            for i, slot in enumerate(obj.material_slots): # itera sobre los slots de material del objeto actual ("obj")
+                if slot.material and slot.material.name.endswith("_new"): # verifica si el slot de material tiene un material asignado y si el nombre del material termina con "_new".
+                    slots_to_remove.append(i) # se agrega el indice pertenceinte al material a la lista "slots_to_remove"
+            for i in reversed(slots_to_remove): # itera sobre a lista en orden inverso, para que no afecte el orden de los índices al eliminar.
+                obj.active_material_index = i # establece el índice del material activo del objeto "obj" al valor "i". Esto para asegurarse de que seleccione el material correcto antes de eliminar el slot de material
 
-# Function to set a new metallic value for the Principled BSDF node
-def set_metallic_value(new_value):
-    # Get the active object
-    obj = bpy.context.active_object
+                #? material_slot_remove = función encargada de eliminar un slot de material de un objeto.
+                bpy.ops.object.material_slot_remove({'object': obj}) # elimina el slot de material en el índice especificado, es decir, elimina el material asociado al slot del objeto.
 
-    # Get the active material of the object
-    material = obj.active_material
+def set_metallic_value(new_value): #! establece un nuevo valor para el parámetro "Metallic" en el nodo "Principled BSDF"
 
-    # Get the principled BSDF node
-    principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
+    obj = bpy.context.active_object # obtenemos el objeto activo.
 
-    # Store the current value of the Metallic input
-    current_value = principled_bsdf.inputs["Metallic"].default_value
+    material = obj.active_material # obtenemos el mtaerial activo del objeto.
+
+    principled_bsdf = material.node_tree.nodes.get("Principled BSDF") # obtenemos el nodo Principled BSDF
+
+    current_value = principled_bsdf.inputs["Metallic"].default_value # almacenamos el valor actual del parámetro "Metallic" 
 
     # Assign the new value to the Metallic input
-    principled_bsdf.inputs["Metallic"].default_value = new_value
+    principled_bsdf.inputs["Metallic"].default_value = new_value # asigna el valor "new_value" al parámetro "Metallic"
 
     # Return the current and new values
-    return current_value, new_value
+    return current_value, new_value # retornamos "current_value" y "new_value"
 
-def restoreMaterial(mat):
-    # Set the active object to the first object in the scene
-    if bpy.context.scene.objects:
-        bpy.context.view_layer.objects.active = bpy.context.scene.objects[0]
+def restoreMaterial(mat): #! función que se encarga de buscar y reemplazar los materiales que terminan por "_new" por materiales previamente existentes
+
+    if bpy.context.scene.objects: # si a escena contiene objetos.
+        bpy.context.view_layer.objects.active = bpy.context.scene.objects[0] # activa el primer objeto de la escena.
 
     for obj in bpy.context.scene.objects:
         num_materials = len(obj.material_slots)
