@@ -398,10 +398,8 @@ def set_metallic_value(new_value): #! establece un nuevo valor para el parámetr
 
     current_value = principled_bsdf.inputs["Metallic"].default_value # almacenamos el valor actual del parámetro "Metallic" 
 
-    # Assign the new value to the Metallic input
     principled_bsdf.inputs["Metallic"].default_value = new_value # asigna el valor "new_value" al parámetro "Metallic"
 
-    # Return the current and new values
     return current_value, new_value # retornamos "current_value" y "new_value"
 
 def restoreMaterial(mat): #! función que se encarga de buscar y reemplazar los materiales que terminan por "_new" por materiales previamente existentes
@@ -409,30 +407,32 @@ def restoreMaterial(mat): #! función que se encarga de buscar y reemplazar los 
     if bpy.context.scene.objects: # si a escena contiene objetos.
         bpy.context.view_layer.objects.active = bpy.context.scene.objects[0] # activa el primer objeto de la escena.
 
-    for obj in bpy.context.scene.objects:
-        num_materials = len(obj.material_slots)
-        if obj.type == 'MESH' and obj.active_material:
-            mat = obj.active_material
-            # Loop through each material in the object
-            # Check if the material name ends with "_new"
-            if mat.name.endswith("_new"):
-                # Get the prefix of the material name by removing "_new"
-                prefix = mat.name[:-4]
-                
-                # Loop through all materials in the scene and find one with the same prefix
-                for other_mat in bpy.data.materials:
-                    if other_mat.name.startswith(prefix):
-                        # Replace the current material with the new material
-                        obj.data.materials[obj.active_material_index] = other_mat
-                        break
+    for obj in bpy.context.scene.objects: # itera sobre los objetos que estan en la escena.
+        num_materials = len(obj.material_slots) # inicializamos "num_materials" con la cantidad de slots de material que contiene el objeto.
+        if obj.type == 'MESH' and obj.active_material: # verifica si el objeto es de tipo "MESH" y que tengan un material actibo asignado.
+            mat = obj.active_material # asignamos el material activo del objeto a la variable "mat"
 
-        slots_to_remove = []
-        for i, slot in enumerate(obj.material_slots):
-            if slot.material and slot.material.name.endswith("_new"):
-                slots_to_remove.append(i)
-        for i in reversed(slots_to_remove):
-            obj.active_material_index = i
-            bpy.ops.object.material_slot_remove({'object': obj})
+            if mat.name.endswith("_new"): # verifica que el nombre del material termine en "_new"
+
+                prefix = mat.name[:-4] # sel le asigna a la variable "prefix" el valor del nombre de material, eliminando el "_new" example: si el nombre del materiales "Cubo_new", el valor del prefix será "Cubo"
+                
+
+                for other_mat in bpy.data.materials: # itera con los materiales disponibles.
+                    if other_mat.name.startswith(prefix): # verifica que el nombre empiece con el mismo prefijo.
+                        
+                        obj.data.materials[obj.active_material_index] = other_mat # reemplaza el materialmente anteriormente asignado por el nuevo material.
+                        break #sale del bucle
+
+        slots_to_remove = [] # se inicializa la lista "slots_to_remove" para almacenar los índices de los slots de material que deben ser eliminados.
+        for i, slot in enumerate(obj.material_slots): # itera sobre los slots de material del objeto actual ("obj")
+            if slot.material and slot.material.name.endswith("_new"): # verifica si el slot de material tiene un material asignado y si el nombre del material termina con "_new".
+                slots_to_remove.append(i) # se agrega el indice pertenceinte al material a la lista "slots_to_remove"
+        for i in reversed(slots_to_remove):  # itera sobre a lista en orden inverso, para que no afecte el orden de los índices al eliminar.
+            obj.active_material_index = i # establece el índice del material activo del objeto "obj" al valor "i". Esto para asegurarse de que seleccione el material correcto antes de eliminar el slot de material
+
+                #? material_slot_remove = función encargada de eliminar un slot de material de un objeto. 
+
+            bpy.ops.object.material_slot_remove({'object': obj}) # itera sobre a lista en orden inverso, para que no afecte el orden de los índices al eliminar.
 
 
 def revert_metallic_value(previous_value):
