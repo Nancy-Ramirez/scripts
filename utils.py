@@ -415,11 +415,10 @@ def restoreMaterial(mat): #! función que se encarga de buscar y reemplazar los 
             if mat.name.endswith("_new"): # verifica que el nombre del material termine en "_new"
 
                 prefix = mat.name[:-4] # sel le asigna a la variable "prefix" el valor del nombre de material, eliminando el "_new" example: si el nombre del materiales "Cubo_new", el valor del prefix será "Cubo"
-                
 
                 for other_mat in bpy.data.materials: # itera con los materiales disponibles.
                     if other_mat.name.startswith(prefix): # verifica que el nombre empiece con el mismo prefijo.
-                        
+
                         obj.data.materials[obj.active_material_index] = other_mat # reemplaza el materialmente anteriormente asignado por el nuevo material.
                         break #sale del bucle
 
@@ -435,62 +434,56 @@ def restoreMaterial(mat): #! función que se encarga de buscar y reemplazar los 
             bpy.ops.object.material_slot_remove({'object': obj}) # itera sobre a lista en orden inverso, para que no afecte el orden de los índices al eliminar.
 
 
-def revert_metallic_value(previous_value):
-    # Get the active object
-    obj = bpy.context.active_object
+def revert_metallic_value(previous_value): #! revierte el valor del canal "Metallic" de un material a un valor anterior.
 
-    # Get the active material of the object
-    material = obj.active_material
+    obj = bpy.context.active_object # obtener el objeto activo de la escena
+
+    material = obj.active_material # obtener el material activo del objeto.
 
     # Check if the material exists and has a node tree
-    if material and material.use_nodes and material.node_tree:
-        # Get the principled BSDF node
-        principled_bsdf = material.node_tree.nodes.get("Principled BSDF")
+    if material and material.use_nodes and material.node_tree: # verifica si el material existe y si está en el árbol de nodos.
 
-        # Check if the principled BSDF node exists
-        if principled_bsdf:
+        principled_bsdf = material.node_tree.nodes.get("Principled BSDF") # obtener el nodo "Principled BSDF" del árbol de nodos del material.
+
+        if principled_bsdf: # verifica si el nodo "Principled BSDF"
             # Revert the value of the Metallic input back to the previous value
-            principled_bsdf.inputs["Metallic"].default_value = previous_value
-    else:
+            principled_bsdf.inputs["Metallic"].default_value = previous_value # asignamos el valor anterior a "Metallic".
+    else: # si el material no existe o si no está en el árbol de nodos.
         print("Material or its node tree does not exist.")
 
-def select_all_meshes():
-    # Deselect all objects
-    bpy.ops.object.select_all(action='DESELECT')
+def select_all_meshes(): #! selecciona todas las mallas "MESH"
 
-    # Get the collection named "Tileable Objects"
-    collection = bpy.data.collections.get("Tileable Objects")
+    bpy.ops.object.select_all(action='DESELECT') # deselecciona todos los objetos
 
-    if collection is not None:
+    collection = bpy.data.collections.get("Tileable Objects") # obtiene las colección llamada "Tileable Objects"
+
+    if collection is not None: # verifica si la colección no está vacía
         # Select all mesh objects in the collection
-        for obj in collection.objects:
-            if obj.type == 'MESH':
-                obj.select_set(True)
+        for obj in collection.objects: # itera  sobre los objetos de la colección.
+            if obj.type == 'MESH': # verifica que los objetos sean tipo "MESH"
+                obj.select_set(True) # selecciona el objeto.
 
-def select_image_texture_node():
-    
-    select_all_meshes()
-    
-    # Get the selected objects
-    selected_objects = bpy.context.selected_objects
-    
-    for selected_obj in selected_objects:
-        # Check if an object is selected
-        if selected_obj is None:
+def select_image_texture_node(): #! selecciona y establece como nodo activo el primer nodo de textura de imagen encontrado en el árbol de nodos del material activo de un objeto seleccionado de malla en la escena.
+
+    select_all_meshes() # llama la función "select_all_meshes" que trabajamos antes.
+
+    selected_objects = bpy.context.selected_objects # obtiene los objetos seleccionados.
+
+    for selected_obj in selected_objects: # itera sobre los objetos seleccionados.
+        if selected_obj is None: # verifica si hay objetos seleccionados
             print("No object selected.")
             continue
-        
-        # Check if the object has a material
-        if len(selected_obj.data.materials) == 0:
+
+        if len(selected_obj.data.materials) == 0: # verifica si el objeto tiene un material.
             print("The selected object has no material.")
             continue
         
         # Get the active material
-        active_material = selected_obj.active_material
-        print(active_material)
+        active_material = selected_obj.active_material # obtiene el material activo
+        print(active_material) # imprime el material activo.
         
         # Check if the active material has nodes
-        if active_material.node_tree is None:
+        if active_material.node_tree is None: # 
             print("The active material has no node tree.")
             continue
         
