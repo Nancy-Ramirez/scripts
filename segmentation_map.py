@@ -1,7 +1,7 @@
-import bpy
-import random 
+import bpy # módulo de Python que proporciona acceso a la API de Blender
+import random  #
 import bmesh
-import os
+import os # libreria que permite acceder a funciones con el sistema operativo.
 
 utils = bpy.data.texts["utils.py"].as_module()
 
@@ -50,7 +50,7 @@ def get_object_islands_bmesh(obj):
 def multiple_bake(obj, folder_path):
 
     # Loop through each material in the object
-    for i, mat in enumerate(obj.data.materials):  
+    for i, mat in enumerate(obj.data.materials): 
         # Create a new material with a random color and a name based on the name of the existing material
         new_material_name = mat.name + "_new"
         new_material = bpy.data.materials.new(name=new_material_name)
@@ -62,7 +62,7 @@ def multiple_bake(obj, folder_path):
             obj.data.materials[i] = new_material
         else:
             obj.data.materials.append(new_material)
-            
+
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.uv.select_all(action='DESELECT')
@@ -83,7 +83,7 @@ def multiple_bake(obj, folder_path):
         texture_node.image = tex_image
         texture_node.image.colorspace_settings.name = 'sRGB'
         texture_node.image.filepath_raw = texture_node.image.name
-        
+
         bpy.context.scene.render.engine = 'CYCLES'
         bpy.context.scene.cycles.device = 'GPU'
         bpy.context.scene.render.bake.use_pass_direct = False
@@ -96,16 +96,16 @@ def multiple_bake(obj, folder_path):
         tex_image.save_render(filepath + material.name + "_BakedTexture.png")
         bpy.ops.image.pack()
         print("Baking Done")
-        
+
 
 def single_bake(obj, folder_path):
-        
+
     bpy.context.view_layer.objects.active = obj
     bm, islands = get_object_islands_bmesh(obj)
-    
+
     tex_image = bpy.data.images.new(name= obj.name + "_1" + "_T_SegmentationMap", width=512, height=512)
 
-    
+
     # create new materials and image textures for each island and assign them to the mesh
     for i, island in enumerate(islands):
         mat = bpy.data.materials.new(name="Island_{}_{}".format(obj.name, i)+ "_new")
@@ -137,7 +137,7 @@ def single_bake(obj, folder_path):
     print("baking")
 
     # Select the object
-    
+
     obj.select_set(True)
 
     bpy.context.scene.render.engine = 'CYCLES'
@@ -154,7 +154,7 @@ def single_bake(obj, folder_path):
     print("baking done")
     # Deselect the object
     obj.select_set(False)
-            
+
 
 def generate_segmentation_map(obj):
     blend_file_path = bpy.data.filepath
@@ -163,7 +163,7 @@ def generate_segmentation_map(obj):
     export_folder_path = os.path.join(folder_path, "segmentation_maps")
     if not os.path.exists(export_folder_path):
         os.makedirs(export_folder_path)
-        
+
     mat = obj.active_material
     #    bpy.ops.object.select_all(action='DESELECT')
     obj.select_set(True)
@@ -181,29 +181,28 @@ def generate_segmentation_map(obj):
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.uv.select_all(action='DESELECT')
     bpy.ops.uv.select_overlap()
-   
+
     if num_materials == 0:
         bpy.ops.object.mode_set(mode='OBJECT')
-        new_material_name = "Material" + obj.name 
+        new_material_name = "Material" + obj.name
         new_material = bpy.data.materials.new(name=new_material_name)
         new_material.use_nodes = True
         obj.data.materials.append(new_material)
         utils.merge(obj)
         bpy.context.view_layer.objects.active = obj
         utils.setup_uvmap(obj)
-            
+
 
     # Unlink image textures from Metallic channel
     linked_images = utils.unlink_image_from_metallic(obj)
     # Set a new Metallic value of 0.8 for the active object's material
     previous_value, _ = utils.set_metallic_value(0.0)
-    
 
     if num_materials > 1:
         multiple_bake(obj, export_folder_path)
     else:
         single_bake(obj, export_folder_path)
-    
+
     utils.restore_materials()
     utils.revert_metallic_value(previous_value)
     # Link previously unlinked image textures back to Metallic channel
@@ -212,37 +211,37 @@ def generate_segmentation_map(obj):
 def Material(obj):
 
         bpy.ops.object.mode_set(mode='OBJECT')
-        new_material_name = "Material_" + obj.name 
+        new_material_name = "Material_" + obj.name
         new_material = bpy.data.materials.new(name=new_material_name)
         new_material.use_nodes = True
         obj.data.materials.append(new_material)
-        
+
 def segmentation_map():
     bpy.context.scene.render.bake.margin = 0
-    
+
     # Create an empty dictionary to store material names and their associated objects
     material_objects = {}
 
     # Dictionary to store the UVs of each object
     uv_dict = {}
-    
+
     # Get the "Imported Objects" collection
     imported_collection = bpy.data.collections.get("Imported Objects")
-    
+
     # Get the "Imported Objects" collection
     tile_collection = bpy.data.collections.get("Tileable Objects")
-    
+
     if imported_collection is None:
         print("Collection 'Imported Objects' not found")
         return
-    
+
     if tile_collection is None:
         print("Collection 'Imported Objects' not found")
         return
-    
+
     # Loop through each object in the "Imported Objects" collection
     tile_collection = tile_collection.objects
-    
+
     for obj in tile_collection:
         num_materials = len(obj.material_slots)
         if num_materials < 1 :
@@ -253,7 +252,7 @@ def segmentation_map():
             utils.setup_uvmap(obj)
         else:
             print("tileable object has one material or more")
-            
+
     # Loop through each object
     for obj in imported_collection.objects:
         if obj.type == 'MESH':
@@ -273,7 +272,7 @@ def segmentation_map():
                 else:
                     # Add the UV set to the dictionary
                     uv_dict[str(uv_coords)] = [obj]
- 
+
 
     # Loop through all objects in the scene
     for obj in imported_collection.objects:
@@ -298,7 +297,7 @@ def segmentation_map():
     for uv_set in uv_dict:
             if len(uv_dict[uv_set]) > 1:
                 print("Objects with the same UV: ", uv_dict[uv_set])
-                
+
     # Loop through the material groups and check if all objects in each group are using the same material
     for group in material_groups:
         materials_used = set([material_slot.material for obj in group for material_slot in obj.material_slots])
@@ -306,9 +305,9 @@ def segmentation_map():
         if len(materials_used) == 1:
             print("Objects {} are sharing a single material: {}".format(group, list(materials_used)[0].name))
             obj= group[0]
-            generate_segmentation_map(obj) 
+            generate_segmentation_map(obj)
             bpy.ops.object.select_all(action='DESELECT')
-  
+
         else:
             # Only execute our code once, for the first group of objects that share multiple materials
             if not code_executed and len(uv_dict[uv_set]) > 1:
@@ -318,16 +317,15 @@ def segmentation_map():
                 print("Materials used: {}".format([material.name for material in materials_used]))
                 code_executed = True
                 obj= group[0]
-                generate_segmentation_map(obj) 
+                generate_segmentation_map(obj)
                 bpy.ops.object.select_all(action='DESELECT')
-      
+
     # Loop through all objects in the scene again, and do something for objects that do not share any materials with another object
     for obj in imported_collection.objects:
         if obj.type == 'MESH' and obj not in [o for group in material_groups for o in group]:
             # Do something here for objects that do not share any materials with another object
             generate_segmentation_map(obj)
             bpy.ops.object.select_all(action='DESELECT')
-            
 
 if __name__ == "__main__":
     tex_image = segmentation_map()
