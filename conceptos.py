@@ -84,3 +84,22 @@
     #? window = representa la ventana en la que se realiza la operación.
     #? screen = representa a pantala en la que se realiza la operación.
     #? area = representa el área en la que se realiza la operación.
+
+# BMesh = es una representación interna de una malla en Blender que permite acceder y manipular de forma eficiente de topología y geometía de una malla.
+
+# .tag = en el contexto actual, se utiliza como marcador o idenficador booleado para rastrear las caras visitadas en el algoritmo "get_linked"_faces()"
+
+#.link_faces = propiedad que devuelve una listas de caras vinculadas al objeto que se aplica. Estas caras son las caras adyacentes al borde del objeto que se aplica en la malla.
+    #?  caras adyacentes = en el contexto de una malla tridimensional, dos caras se consideran adyacentes si comparten un borde en común.
+
+# .edges = aristas que tiene elemento.
+
+# .set() = se utiliza para crear un objeto tipo conjunto en Python. Un conjunto es una colección desordenada de elementos únicos.
+
+# from_mesh = metodo de "bmesh" que se utiliza para copiar la geometría de una malla existente en Blender al objeto "bmesh"
+
+# from_edit_mesh = método estático de la clase "bmesh" en Blender. Se utiliza para crear un objeto "bmesh" basado en la malla en modo edición de un objeto dado.
+
+# ensure_lookup_table = se utiliza en Blender para asegurarse de que la tabla de busqueda de elementos de un objeto "bmesh" esté actualizada y sea válida
+
+

@@ -1,46 +1,63 @@
-import bpy # módulo de Python que proporciona acceso a la API de Blender
-import random  #
-import bmesh
+import bpy # módulo de Python que proporciona acceso a la API de Blender.
+import random  # modulo de Python que proporciona funciones para generar número aleatorios.
+#? BMesh = es una representación interna de una malla en Blender que permite acceder y manipular de forma eficiente de topología y geometía de una malla.
+import bmesh #módulo de Blender que proporciona funciones y clases para realizar operaciones avanzadas en mallas (meshes) utilizando la estructura de datos BMesh.
 import os # libreria que permite acceder a funciones con el sistema operativo.
 
-utils = bpy.data.texts["utils.py"].as_module()
+utils = bpy.data.texts["utils.py"].as_module() # importamos el archivo "utils.py" para poder importar y trabajar con sus funciones.
 
-def get_linked_faces(f):
-    stack = [f]
-    f.tag = True
-    f_linked = []
-    while stack:
-        current = stack.pop()
-        f_linked.append(current)
-        edges = [e for e in current.edges if len(e.link_faces) == 2]
-        for e in edges:
-            faces = [elem for elem in e.link_faces if not elem.tag]
-            for face in faces:
-                face.tag = True
-                stack.append(face)
-    return f_linked
+def get_linked_faces(f): #! función que toma una cara "f" y devuelve una lista de caras conectadas a través de bordes compartidos. Utiliza un enfoque de búsqueda en profundidad para recorrer las caras conectadas.
 
-def get_object_islands_bmesh(obj):
-    islands = []
-    examined = set()
+    stack = [f] # creamos una pila vacía que inicializamos con la cara de malla de entrada "f"
 
-    bpy.ops.object.mode_set(mode='OBJECT')
-    if bpy.ops.object.mode_set(mode='OBJECT'):
-        bm = bmesh.new()
-        bm.from_mesh(obj.data)
-    else:
-        bm = bmesh.from_edit_mesh(obj.data)
+    #? tag = en el contexto actual, se utiliza como marcador o idenficador booleado para rastrear las caras visitadas en el algoritmo "get_linked"_faces()"
+    f.tag = True # marca la cara de entrada "f" como visitada, estableciendo su atributo "tag" en "True"
 
-    bm.faces.ensure_lookup_table()
-    bm.verts.ensure_lookup_table
+    f_linked = [] # inicializamos una lista vacía para almacenar las caras vinculadas durante el proceso del algoritmo "get_linked_faces()"
+    while stack: # mientras la pila no esté vacía
 
-    for face in bm.faces:
-        face.tag = False
+        current = stack.pop() # con "stack.pop" sacamos un elemento de la pila, la cual guardaremos en la variable "current"
 
-    for face in bm.faces:
-        if face in examined:
-            continue
-        links = get_linked_faces(face)
+        f_linked.append(current) # llenamos la lista "f_linked" con el elemento dela pila que fue sacado anteriormente
+
+        #? .link_faces = propiedad que devuelve una listas de caras vinculadas al objeto que se aplica. Estas caras son las caras adyacentes al borde del objeto que se aplica en la malla.
+        #?  caras adyacentes = en el contexto de una malla tridimensional, dos caras se consideran adyacentes si comparten un borde en común
+        #? .edges = aristas que tiene elemento.
+        edges = [e for e in current.edges if len(e.link_faces) == 2] # en la variable "edges" se almacenan los objetos de bordes siempre y cuando el borde tenga exactamente dos caras vinculadas.
+
+        for e in edges:  # itera sobre los objetos de bordes que se encuentran en "edges"
+            faces = [elem for elem in e.link_faces if not elem.tag] # en la variable "faces" se almacenan los objetos primero, tenga caras vinculadas a la arista "e" y segundo no hayan sido procesadas con anterioridad.
+            for face in faces: # itera sobre las caras que se encuentran en faces
+                face.tag = True # se establece que esa cara ya ha sido procesada.
+                stack.append(face) # se agrega a la pila la cara recien procesada.
+    return f_linked # retorna la lista "f_linked"
+
+def get_object_islands_bmesh(obj): # función que toma un objeto "obj" y devuelve una tupla que contiene un objeto BMesh y una lista de caras conectadas. Usamos BMesh para analizar las caras conectadas y determinar las islas.
+    islands = [] # creamos una lista vacía para almacenar las islas de caras.
+    #? .set() = se utiliza para crear un objeto tipo conjunto en Python. Un conjunto es una colección desordenada de elementos únicos.
+    examined = set() # crea un conjunto vacío.
+
+    bpy.ops.object.mode_set(mode='OBJECT') # cambia el modo edición del objeto actual a modo objeto en Blender.
+    if bpy.ops.object.mode_set(mode='OBJECT'): # verifica que esté en modo OBJETO
+        bm = bmesh.new() # crea un objeto "bmesh" vacío.
+        #? from_mesh = metodo de "bmesh" que se utiliza para copiar la geometría de una malla existente en Blender al objeto "bmesh"
+        bm.from_mesh(obj.data) # copiamos la geometría de una malla en el objeto "bmesh"
+    else: # si no está en modo OBJETO.
+        #? from_edit_mesh = método estático de la clase "bmesh" en Blender. Se utiliza para crear un objeto "bmesh" basado en la malla en modo edición de un objeto dado.
+        bm = bmesh.from_edit_mesh(obj.data) # crea un objeto "bmesh" basado en la malla en modo de edición del objeto "obj" en Blender.
+
+    #? ensure_lookup_table = se utiliza en Blender para asegurarse de que la tabla de busqueda de elementos de un objeto "bmesh" esté actualizada y sea válida
+    bm.faces.ensure_lookup_table() # se asegura de que la tabla de búsqueda de cara "bm.faces" esté actualizada y sea válida.
+
+    bm.verts.ensure_lookup_table # se asegura de que la tabla de busqueda de vertices "bm.verts" esté actualizada y sea válida
+
+    for face in bm.faces: # itera sobre las caras que tiene la malla existente en Blender (bm)
+        face.tag = False # establece que esta cara no se ha procesado. Esto permite posteriormente puedamos realizar operaciones como marcar o identificar caras especificas en función del valor de la propiedad "tag".
+
+    for face in bm.faces: # itera sobre las caras que tiene la malla existente en Blender (bm)
+        if face in examined: # verifica que la cara actual haya sido examinada con anterioridad.
+            continue # si la condición anterior es verdadera, salta al for siguiente
+        links = get_linked_faces(face) # si la cara actual no ha sido examinada con anterioridad, utilizamos get_linked_faces para obtener 
         for linked_face in links:
             examined.add(linked_face)
         islands.append(links)
