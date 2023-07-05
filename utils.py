@@ -566,28 +566,26 @@ def colortonormals(): #! función encargada de aplicar el operador "deepbump.col
                             continue
 
                         if image_texture_node is not None: # verifica si la variable no es None
-                            image = bpy.data.images.get(image) #  
+                            image = bpy.data.images.get(image) # busca en el diccionario de imagenes una imagen cuyo nombre coincida con el valor de la variable "image"
 
-                        image_texture_node.select = True
+                        image_texture_node.select = True # establece la propiedad "select" al nodo "image_texture_node", lo que significa que el nodo está seleccionado.
 
                         # Set the active node
-                        node_tree.nodes.active = image_texture_node
+                        node_tree.nodes.active = image_texture_node # establece el nodo activo en el árbol de nodos ("node_tree") al nodo de textura de imagen ("image_texture_node").
 
-                        # Override the operator with the image texture node and new image
-                        override['active_node'] = image_texture_node
-                        override['texture'] = image
+                        override['active_node'] = image_texture_node # establece el nodo de textura de imagen comoel nodo activo en el contexto de la anulación.
 
-                        # Override the operator with the image texture node and texture
-                        override['node'] = node_tree.nodes.active
-                        override['tex'] = texture
+                        override['texture'] = image # asigna la imagen al override ("diccionario de anulación") bajo la clave "texture"
 
-                        bpy.ops.deepbump.colortonormals(override, 'INVOKE_DEFAULT')
+                        override['node'] = node_tree.nodes.active # asigna el nodo activo en el árbol de nodos de materiales a la clave "node" en el override. Esto se hace para proporcionar información adicional al contexto de ejecución de la operación "bpy.ops.deepbump.colortonormals"
 
-                        print("[Material name after override]:", material.name, "[Active Node:]", node_tree.nodes.active, "[Image Texture Name:]", texture.name)
+                        override['tex'] = texture # asigna la textura al override bajo ala clave "tex".
 
+                        bpy.ops.deepbump.colortonormals(override, 'INVOKE_DEFAULT') # llama a la operación personalizada "deepdump.colortonormals" en Blender, pasando el diccionario de anulación "override" como argumento y especificando el modo de invocación como "INVOKE_DEFAULT".
+
+                        print("[Material name after override]:", material.name, "[Active Node:]", node_tree.nodes.active, "[Image Texture Name:]", texture.name) # imprime en consola el nombre del material despues de la anulación, el nodo activo actual en el árbol de nodos del material y el nombre de la textura de la imagen.
                         break
-                else:
-                    # No 'NODE_EDITOR' area found
+                else: #si el tipo no es "NODE_EDITOR"
                     print("Error: 'NODE_EDITOR' area not found.")
                     break
 

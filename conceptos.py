@@ -80,7 +80,7 @@
 
 # next() = es un iterador,avanza al siguiente elemento y lo devuelve.
 
-# override = es un diccionario de Blender que se utiliza para proporcionar información adicional y configuraciones personalizadas al ejecutar una operación o una anulación.
+# override = es un diccionario de Blender que se utiliza para proporcionar información adicional y configuraciones personalizadas al ejecutar una operación o una anulación. ("DICCIONARIO DE ANULACIÓN")
     #? window = representa la ventana en la que se realiza la operación.
     #? screen = representa a pantala en la que se realiza la operación.
     #? area = representa el área en la que se realiza la operación.
