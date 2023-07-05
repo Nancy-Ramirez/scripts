@@ -78,8 +78,8 @@ def multiple_bake(obj, folder_path): #! función que realiza el proceso de horne
         new_material.node_tree.nodes["Principled BSDF"].inputs[0].default_value = (random.random(), random.random(), random.random(), random.random()) #default_value = (R, G, B, A) <-- le asigna un valor aleatorio a cada uno, generando por si un color random al nuevo material.
 
         # Swap the current material with the new material
-        if mat:
-            obj.data.materials[i] = new_material
+        if mat: # verifica si el material existe.
+            obj.data.materials[i] = new_material # se reemplaa
         else:
             obj.data.materials.append(new_material)
 
