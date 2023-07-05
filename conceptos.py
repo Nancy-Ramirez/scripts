@@ -102,4 +102,10 @@
 
 # ensure_lookup_table = se utiliza en Blender para asegurarse de que la tabla de busqueda de elementos de un objeto "bmesh" esté actualizada y sea válida
 
+# examined se utiliza para realizar un seguimiento de las caras que han sido examinadas. Esto se hace para evitar que una cara ya examinada se vuelva a examinar, lo que podría llevarnos a un bucle infinito en el proceso de búsquedaz de islas de caras.
+    #? islas de caras: es un conjunto de caras conectadas entre sí a través de aristas compartidas. en 3d, las caras representan las superficies planas de un objeto y una isla de caras se refiere a un grupo de caras que están interconectadas directa o indirectamente.
+
+# hornear texturas = En el contexto del horneado de texturas, se aplican diferentes propiedades y configuraciones del material (como color, brillo, rugosidad, etc.) al objeto y luego se realiza el proceso de bake para generar las texturas resultantes. Durante el horneado, se calculan y asignan los valores de color y otros atributos a los píxeles de la textura, creando así una representación final de la apariencia del objeto.
+
+
 

@@ -57,22 +57,25 @@ def get_object_islands_bmesh(obj): # función que toma un objeto "obj" y devuelv
     for face in bm.faces: # itera sobre las caras que tiene la malla existente en Blender (bm)
         if face in examined: # verifica que la cara actual haya sido examinada con anterioridad.
             continue # si la condición anterior es verdadera, salta al for siguiente
-        links = get_linked_faces(face) # si la cara actual no ha sido examinada con anterioridad, utilizamos get_linked_faces para obtener 
-        for linked_face in links:
-            examined.add(linked_face)
-        islands.append(links)
+        links = get_linked_faces(face) # si la cara actual no ha sido examinada con anterioridad, utilizamos "get_linked_faces" para obtener una lista de caras conectadas a la cara actual.
+        for linked_face in links: # itera sobre cada cara conectada en la lista "links".
+            # examined se utiliza para realizar un seguimiento de las caras que han sido examinadas. Esto se hace para evitar que una cara ya examinada se vuelva a examinar, lo que podría llevarnos a un bucle infinito en el proceso de búsquedaz de islas de caras.
+            #? islas de caras: es un conjunto de caras conectadas entre sí a través de aristas compartidas. en 3d, las caras representan las superficies planas de un objeto y una isla de caras se refiere a un grupo de caras que están interconectadas directa o indirectamente.
+            examined.add(linked_face) # agregar la cara conectada a "examined"
+        islands.append(links) #se agrega la lista "links" a la lista "islands", lo que representa un grupo de caras conectadas.
 
     return (bm, islands)
 
-def multiple_bake(obj, folder_path):
+#? hornear texturas = En el contexto del horneado de texturas, se aplican diferentes propiedades y configuraciones del material (como color, brillo, rugosidad, etc.) al objeto y luego se realiza el proceso de bake para generar las texturas resultantes. Durante el horneado, se calculan y asignan los valores de color y otros atributos a los píxeles de la textura, creando así una representación final de la apariencia del objeto.
 
-    # Loop through each material in the object
-    for i, mat in enumerate(obj.data.materials): 
-        # Create a new material with a random color and a name based on the name of the existing material
-        new_material_name = mat.name + "_new"
-        new_material = bpy.data.materials.new(name=new_material_name)
-        new_material.use_nodes = True
-        new_material.node_tree.nodes["Principled BSDF"].inputs[0].default_value = (random.random(), random.random(), random.random(), random.random())
+def multiple_bake(obj, folder_path): #! función que realiza el proceso de horneado para múltiples materiales de un objeto. Itera sobre los materiales del objeto y crea un nuevo material para cada uno de ellos. Luego establece una nueva textura de imagen para cada material y realiza la cocción del objeto para cada material.
+
+    for i, mat in enumerate(obj.data.materials): # itera sobre los materiales asociados al obeto "obj"
+        #todo Creamos un nuevo material con un color random y con un nombre basado en el nombre de un material existente.
+        new_material_name = mat.name + "_new" # crea un nuevo nombre para el nuevo material, apartir de una nombre de material ya existente.
+        new_material = bpy.data.materials.new(name=new_material_name) # creamos un nuevo material en la base de datos de materiales de Blender y devuelve una referencia a ese material, se almacena con el nombre que se le asignó a "new_material_name"
+        new_material.use_nodes = True # habilitamos el uso de nodos para la configuración del material.
+        new_material.node_tree.nodes["Principled BSDF"].inputs[0].default_value = (random.random(), random.random(), random.random(), random.random()) #default_value = (R, G, B, A) <-- le asigna un valor aleatorio a cada uno, generando por si un color random al nuevo material.
 
         # Swap the current material with the new material
         if mat:
